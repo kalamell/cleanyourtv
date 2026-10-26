@@ -89,9 +89,30 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/dockAppsChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="28dp" />
+
+        <TextView
             android:id="@+id/wallpaperChoice"
             style="@style/SettingsRow"
             android:layout_marginTop="28dp" />
+
+        <TextView
+            android:id="@+id/uploadChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp"
+            android:text="@string/upload_wallpaper" />
+
+        <TextView
+            android:id="@+id/fontChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:id="@+id/languageChoice"
+            style="@style/SettingsRow"
+            android:layout_marginTop="10dp" />
 
         <TextView
             android:id="@+id/animationsChoice"

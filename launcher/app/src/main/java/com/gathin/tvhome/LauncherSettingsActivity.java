@@ -33,6 +33,9 @@ public final class LauncherSettingsActivity extends Activity {
     private static final int[] DOCK_OPACITIES = {100, 70, 50, 30};
     private final TextView[] dockChoices = new TextView[DOCK_OPACITIES.length];
     private TextView wallpaperChoice;
+    private TextView fontChoice;
+    private TextView languageChoice;
+    private TextView dockAppsChoice;
     private TextView animationsChoice;
     private TextView advancedChoice;
     private TextView followThemeChoice;
@@ -47,6 +50,7 @@ public final class LauncherSettingsActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_launcher_settings);
+        UiFont.apply(this, findViewById(android.R.id.content));   // the font chosen in Launcher settings
         choices = getSharedPreferences(Config.SETTINGS_NAME, MODE_PRIVATE);
         Config config = Config.load(this);
         View reorderChoice = findViewById(R.id.reorderChoice);
@@ -108,6 +112,14 @@ public final class LauncherSettingsActivity extends Activity {
         }
         wallpaperChoice = findViewById(R.id.wallpaperChoice);
         wallpaperChoice.setOnClickListener(v -> showWallpaperPicker());
+        findViewById(R.id.uploadChoice).setOnClickListener(v ->
+                open(new Intent(this, UploadWallpaperActivity.class)));
+        fontChoice = findViewById(R.id.fontChoice);
+        fontChoice.setOnClickListener(v -> showFontPicker());
+        dockAppsChoice = findViewById(R.id.dockAppsChoice);
+        dockAppsChoice.setOnClickListener(v -> showDockAppsPicker());
+        languageChoice = findViewById(R.id.languageChoice);
+        languageChoice.setOnClickListener(v -> showLanguagePicker());
         animationsChoice = findViewById(R.id.animationsChoice);
         animationsChoice.setOnClickListener(v -> {
             animations = !animations;
@@ -140,7 +152,8 @@ public final class LauncherSettingsActivity extends Activity {
             if (!hasOnTvChoices()) return;
             choices.edit().remove("columns").remove(Config.ROWS_BELOW_DOCK_KEY).remove("animations")
                     .remove("advanced_effects").remove(Config.WALLPAPER_CHOICE_KEY)
-                    .remove(Config.DOCK_OPACITY_KEY).remove(OpenOnStart.KEY).commit();
+                    .remove(Config.DOCK_OPACITY_KEY).remove(OpenOnStart.KEY)
+                    .remove(Config.DOCK_APPS_CHOICE_KEY).commit();
             Config current = Config.load(this);
             columns = current.columns;
             rowsBelowDock = current.rowsBelowDock;
@@ -201,6 +214,100 @@ public final class LauncherSettingsActivity extends Activity {
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+    }
+
+    /** The bundled Thai families; Home and these settings are drawn again in the one picked. */
+    private void showFontPicker() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.font_label)
+                .setSingleChoiceItems(UiFont.LABELS, UiFont.chosen(this), (dialog, which) -> {
+                    dialog.dismiss();
+                    if (which == UiFont.chosen(this)) return;
+                    choices.edit().putString(UiFont.KEY, UiFont.FAMILIES[which]).apply();
+                    changed();
+                    recreate();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /**
+     * Which apps sit in the front row (the dock), up to one row's worth; every other app is still on Home, below
+     * it, where Down reaches it. The ones already in the dock come first, in their order, then the rest by name.
+     */
+    private void showDockAppsPicker() {
+        PackageManager pm = getPackageManager();
+        List<String[]> apps = new ArrayList<>();
+        Intent tv = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+        for (ResolveInfo r : pm.queryIntentActivities(tv, 0)) {
+            String pkg = r.activityInfo.packageName;
+            if (pkg.equals(getPackageName())) continue;
+            boolean seen = false;
+            for (String[] a : apps) seen |= a[1].equals(pkg);
+            if (!seen) apps.add(new String[]{r.loadLabel(pm).toString(), pkg});
+        }
+        List<String> dock = Config.load(this).dockApps;
+        Collections.sort(apps, (a, b) -> {
+            int ia = dock.indexOf(a[1]), ib = dock.indexOf(b[1]);
+            if (ia >= 0 || ib >= 0) return ia < 0 ? 1 : ib < 0 ? -1 : Integer.compare(ia, ib);
+            return a[0].compareToIgnoreCase(b[0]);
+        });
+        String[] labels = new String[apps.size()];
+        boolean[] checked = new boolean[apps.size()];
+        for (int i = 0; i < apps.size(); i++) {
+            labels[i] = apps.get(i)[0];
+            checked[i] = dock.contains(apps.get(i)[1]);
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.dock_apps_title, columns))
+                .setMultiChoiceItems(labels, checked, (dialog, which, isChecked) -> checked[which] = isChecked)
+                .setPositiveButton(R.string.save, (dialog, which) -> {
+                    List<String> picked = new ArrayList<>();
+                    for (int i = 0; i < apps.size(); i++) if (checked[i]) picked.add(apps.get(i)[1]);
+                    if (picked.size() > columns) {
+                        Toast.makeText(this, getString(R.string.dock_apps_too_many, columns), Toast.LENGTH_LONG).show();
+                        picked = picked.subList(0, columns);
+                    }
+                    choices.edit().putString(Config.DOCK_APPS_CHOICE_KEY, String.join(",", picked)).apply();
+                    changed();
+                    refresh();
+                })
+                .setNeutralButton(R.string.wallpaper_theme_default, (dialog, which) -> {
+                    choices.edit().remove(Config.DOCK_APPS_CHOICE_KEY).apply();
+                    changed();
+                    refresh();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    /** The TV's language, Thai or English; Home and these settings come back in the one picked. */
+    private void showLanguagePicker() {
+        String[] labels = languageLabels();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.language_label)
+                .setSingleChoiceItems(labels, languageIndex(), (dialog, which) -> {
+                    dialog.dismiss();
+                    if (which == languageIndex()) return;
+                    choices.edit().putString(LauncherLocale.KEY, LauncherLocale.TAGS[which]).commit();
+                    changed();
+                    recreate();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private String[] languageLabels() {
+        String[] labels = LauncherLocale.NATIVE_NAMES.clone();
+        labels[0] = getString(R.string.language_system);
+        return labels;
+    }
+
+    /** The picked language's index in LauncherLocale.TAGS; System when nothing was picked. */
+    private int languageIndex() {
+        String picked = choices.getString(LauncherLocale.KEY, LauncherLocale.SYSTEM);
+        for (int i = 0; i < LauncherLocale.TAGS.length; i++) if (LauncherLocale.TAGS[i].equals(picked)) return i;
+        return 0;
     }
 
     /** Off, then every app with a TV entry point by name. Saved at once; it is read on the next boot. */
@@ -298,6 +405,11 @@ public final class LauncherSettingsActivity extends Activity {
                         : wallpaperCurrent != null ? wallpaperCurrent
                         : getString(R.string.wallpaper_theme_default)));
         openOnStartChoice.setText(getString(R.string.open_on_start_state, openOnStartLabel()));
+        fontChoice.setText(getString(R.string.font_state, UiFont.LABELS[UiFont.chosen(this)]));
+        languageChoice.setText(getString(R.string.language_state, languageLabels()[languageIndex()]));
+        String dockPicked = choices.getString(Config.DOCK_APPS_CHOICE_KEY, null);
+        dockAppsChoice.setText(dockPicked == null ? getString(R.string.dock_apps_state_theme)
+                : getString(R.string.dock_apps_state, dockPicked.isEmpty() ? 0 : dockPicked.split(",").length));
         followThemeChoice.setSelected(!hasOnTvChoices());
     }
 
@@ -305,7 +417,7 @@ public final class LauncherSettingsActivity extends Activity {
         return choices.contains("columns") || choices.contains(Config.ROWS_BELOW_DOCK_KEY)
                 || choices.contains("animations") || choices.contains("advanced_effects")
                 || choices.contains(Config.WALLPAPER_CHOICE_KEY) || choices.contains(Config.DOCK_OPACITY_KEY)
-                || choices.contains(OpenOnStart.KEY);
+                || choices.contains(OpenOnStart.KEY) || choices.contains(Config.DOCK_APPS_CHOICE_KEY);
     }
 
     private void open(Intent intent) {

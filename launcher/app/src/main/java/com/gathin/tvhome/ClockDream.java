@@ -17,6 +17,7 @@ public class ClockDream extends DreamService {
         setFullscreen(true);
         setScreenBright(false);
         setContentView(R.layout.dream_clock);
+        UiFont.apply(this, findViewById(android.R.id.content));   // the font chosen in Launcher settings
         scene = new ClockScene(getWindow().getDecorView());
         scene.useHomeWallpaper(this);
     }

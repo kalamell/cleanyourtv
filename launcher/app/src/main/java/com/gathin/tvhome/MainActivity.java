@@ -387,6 +387,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        UiFont.apply(this, findViewById(android.R.id.content));   // the font chosen in Launcher settings
         density = getResources().getDisplayMetrics().density;
         // config.xml, overlaid by config.json from a pushed theme (see Config and tools/theme.sh).
         Config cfg = Config.load(this);
@@ -606,6 +607,21 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // tvOS layout: push the dock row towards the bottom of the screen, leaving room for
         // rows_below_dock grid rows under it; the rest of the grid stays below until you press Down.
         int rowsBelowDock = cfg.rowsBelowDock;
+        // Scroll hint: with no grid rows under the dock, the dock sits lower and a hint under it says the rest
+        // of the apps are below. It fades out once the grid scrolls and comes back at the dock.
+        View scrollHint = findViewById(R.id.scrollHint);
+        boolean showScrollHint = MainActivity.this.dockRow && !singleRow && rowsBelowDock == 0;
+        int hintDrop = showScrollHint ? (int) (28 * density) : 0;
+        if (showScrollHint) {
+            scrollHint.setVisibility(View.VISIBLE);
+            grid.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+                    float target = rv.computeVerticalScrollOffset() > 4 * density ? 0f : 1f;
+                    if (scrollHint.getAlpha() != target) scrollHint.animate().alpha(target).setDuration(180).start();
+                }
+            });
+        }
         grid.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
             int h = b - t;
             // Item height follows the tile size, which follows the columns and the rows that must fit (AppAdapter.tileWidthPx).
@@ -617,7 +633,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             // Keep the hero below the header when the library is enabled on a short screen,
             // even when the theme requests an extra visible row below the dock.
             int shelfClearance = cfg.appLibrary ? hero.getMeasuredHeight() + (int) (40 * density) : 0;
-            int want = Math.max(shelfClearance, h - dockRow - gridRows - (int) (AppAdapter.BOTTOM_ROOM_DP * density));
+            int want = Math.max(shelfClearance, h - dockRow - gridRows - (int) (AppAdapter.BOTTOM_ROOM_DP * density) + hintDrop);
             // Where the rows cannot fit even at the smallest tile (3 rows with the title on), the title keeps its
             // room above the dock and the last rows run off the bottom instead of the title drawing over the clock.
             if (MainActivity.this.dockRow && cfg.dockTitle && rowsBelowDock > 0) want = Math.max(want, (int) (AppAdapter.TITLE_ROOM_DP * density));

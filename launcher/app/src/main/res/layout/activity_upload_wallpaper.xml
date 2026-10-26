@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Upload a wallpaper from a phone: the address to open and the PIN to type, readable from the sofa. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FF0B0D12"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
+    android:paddingStart="96dp"
+    android:paddingEnd="96dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/upload_title"
+        android:textColor="#FFFFFFFF"
+        android:textSize="30sp"
+        android:fontFamily="@string/font_medium" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="@string/upload_step_wifi"
+        android:textColor="#CCFFFFFF"
+        android:textSize="18sp"
+        android:fontFamily="@string/font_regular" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:text="@string/upload_step_open"
+        android:textColor="#CCFFFFFF"
+        android:textSize="18sp"
+        android:fontFamily="@string/font_regular" />
+
+    <TextView
+        android:id="@+id/uploadAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/header_pill_bg"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:textColor="#FFFFFFFF"
+        android:textSize="34sp"
+        android:fontFamily="@string/font_medium" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:text="@string/upload_step_pin"
+        android:textColor="#CCFFFFFF"
+        android:textSize="18sp"
+        android:fontFamily="@string/font_regular" />
+
+    <TextView
+        android:id="@+id/uploadPin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/header_pill_bg"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:letterSpacing="0.3"
+        android:textColor="#FFFFFFFF"
+        android:textSize="40sp"
+        android:fontFamily="@string/font_medium" />
+
+    <TextView
+        android:id="@+id/uploadStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/upload_waiting"
+        android:textColor="#99FFFFFF"
+        android:textSize="16sp"
+        android:fontFamily="@string/font_regular" />
+</LinearLayout>

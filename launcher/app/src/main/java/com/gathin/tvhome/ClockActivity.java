@@ -24,6 +24,7 @@ public class ClockActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dream_clock);
+        UiFont.apply(this, findViewById(android.R.id.content));   // the font chosen in Launcher settings
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE);
         scene = new ClockScene(getWindow().getDecorView());

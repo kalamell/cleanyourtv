@@ -12,6 +12,12 @@ import java.util.regex.Pattern;
  */
 final class LauncherLocale {
     private static final Pattern TAG = Pattern.compile("[a-z]{2,3}(-[A-Za-z0-9]{2,8})?");
+    /** Launcher settings' language choice: SYSTEM, or a tag from TAGS. Unset leaves the theme's locale. */
+    static final String KEY = "ui_locale";
+    static final String SYSTEM = "system";
+    static final String[] TAGS = {SYSTEM, "th", "en"};
+    /** Each language in its own name, so it can be found whatever the launcher is showing. */
+    static final String[] NATIVE_NAMES = {null, "ไทย", "English"};
 
     private LauncherLocale() {
     }
@@ -24,12 +30,21 @@ final class LauncherLocale {
 
     /** base with the configured language, or base itself when locale is off. */
     static Context wrap(Context base) {
-        Locale locale = parse(Config.load(base).locale);
-        if (locale == null) return base;
+        // A language picked in Launcher settings wins over the theme's; "system" means the TV's own.
+        String picked = base.getSharedPreferences(Config.SETTINGS_NAME, Context.MODE_PRIVATE).getString(KEY, null);
+        if (SYSTEM.equals(picked)) return systemDefault(base);
+        Locale locale = parse(picked != null ? picked : Config.load(base).locale);
+        if (locale == null) return systemDefault(base);
         // Formatters that take no Context (the clock's date, the lunar line) follow the default locale.
         Locale.setDefault(locale);
         Configuration c = new Configuration(base.getResources().getConfiguration());
         c.setLocale(locale);
         return base.createConfigurationContext(c);
+    }
+
+    /** base unchanged, with the default locale put back to the TV's after an earlier pick changed it. */
+    private static Context systemDefault(Context base) {
+        Locale.setDefault(base.getResources().getConfiguration().getLocales().get(0));
+        return base;
     }
 }

@@ -7,6 +7,8 @@
     <uses-feature android:name="android.hardware.wifi" android:required="false" />
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 
+    <!-- Only for the wallpaper upload page (UploadWallpaperActivity), served on the local network while open. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- Needed since Android 10 to read the Wi-Fi network name for the network pill. Never requested at
@@ -101,6 +103,12 @@
 
         <activity
             android:name=".LauncherSettingsActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:screenOrientation="landscape" />
+        <!-- Sending a wallpaper from a phone on the same Wi-Fi; its web server runs only while this is open. -->
+        <activity
+            android:name=".UploadWallpaperActivity"
             android:exported="false"
             android:excludeFromRecents="true"
             android:screenOrientation="landscape" />

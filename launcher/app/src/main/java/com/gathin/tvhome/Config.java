@@ -41,6 +41,8 @@ final class Config {
     static final String WALLPAPER_NAME = "wallpaper.jpg";
     static final String SETTINGS_NAME = "launcher_settings";
     static final String ROWS_BELOW_DOCK_KEY = "rows_below_dock";
+    /** Launcher settings' front-row apps, comma-joined package names in dock order. */
+    static final String DOCK_APPS_CHOICE_KEY = "dock_apps_choice";
     static final String WALLPAPER_CHOICE_KEY = "wallpaper_choice";
     static final String DOCK_OPACITY_KEY = "dock_opacity";
     /**
@@ -614,6 +616,13 @@ final class Config {
         if (chosenRows >= 0 && chosenRows <= 3) rowsBelow = chosenRows;
         animations = choices.getBoolean("animations", animations);
         advancedEffects = choices.getBoolean("advanced_effects", advancedEffects);
+        // Front-row apps picked in Launcher settings: only these sit in the dock, the rest wait below it.
+        String chosenDock = choices.getString(DOCK_APPS_CHOICE_KEY, null);
+        if (chosenDock != null) {
+            dock = new ArrayList<>();
+            for (String pkg : chosenDock.split(",")) if (!pkg.isEmpty()) dock.add(pkg);
+            fillDock = false;
+        }
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
         // A theme can also switch the wallpaper off while the file is still there.

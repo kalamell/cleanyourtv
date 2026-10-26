@@ -165,11 +165,15 @@
 
             <LinearLayout
                 android:id="@+id/leftBlock"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:layout_toStartOf="@+id/topButtons"
                 android:layout_marginEnd="16dp"
+                android:background="@drawable/header_pill_bg"
+                android:paddingStart="22dp"
+                android:paddingEnd="28dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="4dp"
                 android:orientation="vertical">
 
                 <!-- The header texts use gravity left, not start: the launcher lays out left to right
@@ -178,7 +182,7 @@
                 <TextView
                     android:id="@+id/greeting"
                     android:gravity="left"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:singleLine="true"
                     android:ellipsize="end"
@@ -190,10 +194,10 @@
                     android:textAllCaps="true" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:baselineAligned="true">
+                    android:baselineAligned="false">
 
                     <TextClock
                         android:id="@+id/clock"
@@ -226,25 +230,22 @@
                         android:id="@+id/clockDivider"
                         android:layout_width="1dp"
                         android:layout_height="26dp"
-                        android:layout_gravity="bottom"
+                        android:layout_gravity="center_vertical"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="8dp"
                         android:background="#33FFFFFF" />
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:layout_marginBottom="9dp"
+                        android:layout_gravity="center_vertical"
                         android:orientation="vertical">
 
                         <!-- Shamsi date ("27 Mehr 1405"), shown when shamsi_date is on. -->
                         <TextView
                             android:id="@+id/shamsiDate"
                             android:gravity="left"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:singleLine="true"
                             android:ellipsize="end"
@@ -258,7 +259,7 @@
                         <TextClock
                             android:id="@+id/date"
                             android:gravity="left"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:singleLine="@bool/date_single_line"
                             android:maxLines="2"
@@ -276,7 +277,7 @@
                         <TextView
                             android:id="@+id/lunarDate"
                             android:gravity="left"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:singleLine="true"
@@ -316,8 +317,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
+                android:layout_alignTop="@id/leftBlock"
                 android:layout_alignBottom="@id/leftBlock"
-                android:layout_marginBottom="6dp"
+                android:gravity="center_vertical"
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 android:orientation="horizontal">
@@ -392,6 +394,42 @@
                 android:scrollbars="none"
                 android:descendantFocusability="afterDescendants" />
         </FrameLayout>
+    </LinearLayout>
+
+    <!-- Scroll hint under the dock: a round arrow and a line saying the rest of the apps are below. Faded out
+         in code once the grid scrolls down, and back when it returns to the dock. -->
+    <LinearLayout
+        android:id="@+id/scrollHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="6dp"
+        android:background="@drawable/header_pill_bg"
+        android:paddingStart="4dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:focusable="false"
+        android:importantForAccessibility="no"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:padding="3dp"
+            android:background="@drawable/hint_circle_bg"
+            android:src="@drawable/ic_expand_more" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="@string/scroll_hint"
+            android:textColor="#E6FFFFFF"
+            android:textSize="13sp"
+            android:fontFamily="@string/font_regular" />
     </LinearLayout>
 
     <!-- The single floating glass highlight that springs between tiles. -->
